@@ -1,7 +1,7 @@
 <h1 align="center"> ethics-two-resources </h1>
 
 <p align="center">
-  <img src="assets/ethics-2-logo.png" width="40%">
+  <img src="assets/ethics-2-logo.png" width="30%">
 </p>
 
 Course materials for Part 2 of the course "Ethics in Data Science and Artificial Intelligence"  
