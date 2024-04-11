@@ -1,6 +1,10 @@
-# ethics-two-resources
+<h1 align="center"> ethics-two-resources </h1>
 
-Course materials for part 2 of the course "Ethics in Data Science and Artificial Intelligence"  
+<p align="center">
+  <img src="assets/ethics-2-logo.png" width="40%">
+</p>
+
+Course materials for Part 2 of the course "Ethics in Data Science and Artificial Intelligence"  
 
 
 ## Welcome Back 
@@ -37,9 +41,9 @@ You should take the lead in these sessions - turn up prepared with issues or dis
 
 Access the Ed discussion board here. 
 
-### Assessments For Ethics Part II 
+### Assessments
 
-There will be three assessed elements:
+Part II of the course contributes 40% of your total grade for the module. There will be three assessed elements:
 
 - weekly peer-reviewed written summaries of your assigned reading,
 
