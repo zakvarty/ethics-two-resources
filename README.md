@@ -1,4 +1,4 @@
-# ethics-two-materials
+# ethics-two-resources
 
 Course materials for part 2 of the course "Ethics in Data Science and Artificial Intelligence"  
 
@@ -47,17 +47,22 @@ There will be three assessed elements:
 
 - one individual assessment that will be released near the end of the course.
 
-You will have the opportunity to submit up to 6 reading summaries. These will be peer-marked and these marks will be moderated by the course lecturer and/or graduate teaching assistants. Your reading summary grade will be calculated as the average of your 5 highest scoring submissions. In particular, this means that you can miss one submission without any consequence.
+
+|     Assessment Type    |    Release Date   |      Due Date                      |   % of Ethics Module  |
+|:----------------------:|:-----------------:|:----------------------------------:|:---------------------:|
+|  Reading Summaries     |  Weekly Fri 12:00 |  Following Wed/Fri 09:00           |   5                   |
+|  Group Assessment      |  2024-05-27 09:00 |  2024-06-12 09:00 (Progress Update)|   -                   |
+|                        |                   |  2024-06-28 09:00 (Submission)     |	  20                  |
+|  Individual assessment |  2024-06-24 09:00 |  2024-07-08 09:00                  |   15                  | 
+
+
+### Reading Summary Details
+
+As in Part I of the course, you will have the opportunity to submit up to 6 reading summaries. These will be peer-marked and these marks will be moderated by the course lecturer and/or graduate teaching assistants. Your reading summary grade will be calculated as the average of your 5 highest scoring submissions. In particular, this means that you can miss one submission without any consequence.
 
 **Note:** each reading summary requires you to write your own summary **and** to provide feedback to other students.
 
-The weekly deadline for your written submission is **Date XXXXXX (UK)** and the weekly deadline for the peer-feedback is **Date XXXXXXX (UK)**. 
-
-|      Assessment Type     |     Release Date   |       Due Date     |   % of Ethics Module  |
-|:------------------------:|:------------------:|:------------------:|:---------------------:|
-|   Reading Summaries      |   weekly           |   weekly           |   5                   |
-|   Group Assessment       |   Date XXXX-XX-XX  |   Date XXXX-XX-XX  |   20                  |
-|   Individual assessment  |   Date XXXX-XX-XX  |   Date XXXX-XX-XX  |   15                  | 
+The weekly deadline for your written submission is **Wednesday at 09:00 (UK)** and the weekly deadline for the peer-feedback is **Friday at 09:00 (UK)**. 
 
 
 ## Happy Learning!
