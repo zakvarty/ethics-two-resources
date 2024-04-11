@@ -5,7 +5,7 @@ Course materials for Part 2 of the course "Ethics in Data Science and Artificial
 </p>
 
 <p align="center">
-  <img src="assets/ethics-2-logo.png" width="20%">
+  <img src="assets/ethics-2-logo.png" width="15%" alt="Course logo for MLDS Ethics Part II. The course title is written in bold lettering in front of a set of balanced scales.">
 </p>
 
   
