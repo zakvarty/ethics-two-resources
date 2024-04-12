@@ -30,12 +30,12 @@ You should write your rhetorical precis on the following reading.
 
 - `sklearn` [documentation](https://scikit-learn.org/stable/modules/partial_dependence.html) on partial dependence plots. 
 
-<!--
+
 ### Ethics 2: Week 2 Reading - Local Effects and Interactions
 
 #### Assessed Reading
 
-You should write your rhetorical precis on the following reading (Due Thursday at 23:59).
+You should write your rhetorical precis on the following reading.
 
 > [Berrington De Gonzalez, A and Cox, DR. (2007).](https://doi.org/10.1214/07-AOAS124) Interpretation of Interaction: A Review. Annals of Applied Statistics, 371-385.
 
@@ -46,7 +46,7 @@ You should write your rhetorical precis on the following reading (Due Thursday a
 
 - [Interpretable Machine Learning: Chapter 8.3 - Feature Interaction](https://christophm.github.io/interpretable-ml-book/interaction.html)
 
-- [Goldstein et al. (2015)](https://doi.org/10.1080/10618600.2014.907095) Peeking Inside the Black Box: Visualizing Statistical Learning With Plots of Individual Conditional Expectation. Journal of Computational and Graphical Statistics,  24:1,44-65.
+- [Goldstein et al. (2015)](https://doi.org/10.1080/10618600.2014.907095) Peeking Inside the Black Box: Visualizing Statistical Learning With Plots of Individual Conditional Expectation. Journal of Computational and Graphical Statistics, 24:1, 44-65.
 
 #### Supplementary Reading 
 
@@ -54,6 +54,7 @@ You should write your rhetorical precis on the following reading (Due Thursday a
 
 - [Interpretable Machine Learning: Chapter 9.5 & 9.6 - Shapley values and SHAP](https://christophm.github.io/interpretable-ml-book/shapley.html)
 
+<!--
 ### Ethics 2: Week 3 Reading - Bias and Causality
 
 #### Assessed Reading
