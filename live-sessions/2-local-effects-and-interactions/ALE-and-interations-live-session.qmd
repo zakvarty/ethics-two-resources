@@ -1,0 +1,174 @@
+---
+title: "Ethics 2: Live Session 2"
+author: "Zak Varty"
+format:
+  html:
+    theme: [litera]
+    toc: true
+    self-contained: true
+  pdf: default
+---
+
+- Summary and further exploration of the topics covered this week. 
+
+
+## Accumulated Local Effects Plot
+
+Consider a model $f(x, y, z;\theta)$ with:
+
+  - three predictors $X$, $Y$, and $Z$,
+  - fitted parameter values $\hat \theta$,
+  - estimated using on $n$ observations: $\{(x_i, y_i, z_i), a_i\}$. 
+
+### ICE plots
+
+Individual conditional expectation plots show the counter-factual prediction of the outcome as one predictor is varied for each individual. 
+
+$$f_i(x; \hat \theta) = f(x, y_i, z_i; \hat\theta).$$ 
+![](./images/Sketches-9.png)
+
+We can construct 1 such ICE plot per observation or person within our dataset. 
+
+![](./images/Sketches-8.png)
+
+We have to be careful about extrapolating to unreasonable combinations $(x,y,z)$. Just because we can make a prediction doesn't mean we should. 
+
+In the example below, increasing x to 1 while keeping y fixed does not seem reasonable.
+
+```{r}
+#| echo: false
+set.seed(3)
+x <- rnorm(100)
+y <- rnorm(100, 3 * x)
+plot(x, y, pch = c(16, rep(1,99)), col = c("black", rep("grey40", 99)))
+```
+
+These sorts of checks rapidly get harder in higher dimensions.
+
+### PDPs 
+
+Partial dependence plots, which you met last week show the expected response as a function of one predictor, __averaged over the values of all other covariates__. 
+
+So in our example the PDP for $X$ would be:
+
+$$ f_{pdp}(x;\hat\theta)  = \mathbb{E}_{Y,Z}[f (x, Y, Z; \hat \theta)] \approx \frac{1}{n} \sum_{i=1}^n \hat f(x, y_i, z_{i}).$$
+
+PDPs can be considered as the expected (or point wise mean) of the ICE curves. 
+
+![](./images/Sketches-7.png)
+
+- While this describes how a response changes on average, that does not mean we expect any individual ICE cure to look anything like the PDP. 
+
+![](./images/Sketches-6.png)
+
+Similar to ICEs we have to be careful about extrapolating / interpolating with PDPs to low-density regions of predictor space. 
+
+If $X$ is independent of $Y$ and $Z$ the above expectation makes sense, it assumes that all of the observed $y$ and $z$ values could be observed alongside any $x$ value in our pdp with equal probability. 
+
+```{r}
+#| echo: false 
+set.seed(1234)
+par(mfrow = c(1,2))
+y <- rgamma(n = 100, shape = 5, rate = 10)
+z <- rnorm(n = 100, mean = 5, sd = 0.5)
+x <- runif(n =  100)
+plot(y,z, bty = "n", pch = 16,ylim = c(0, 8), xlim = c(0, 1.5), main = "X, Y and Z independent", col = rgb(0,0,0,x))
+
+y <- rgamma(n = 100, shape = 5, rate = 10)
+z <- rnorm(n = 100, mean = 5 + 3 * (y - mean(y)), sd = 0.5 * y/mean(y))
+x <- rbeta(n = 100, shape1 = y, shape2 = z)
+plot(y,z, bty = "n", pch = 16, ylim = c(0, 8), xlim = c(0, 1.5), main = "X, Y and Z dependent", col = rgb(0,0,0,2.3 * x))
+par(mfrow = c(1,1))
+```
+
+If we return to our trees example, this is clearly not the case - from context we know that a tree with very large volume is also likely to be taller. 
+
+### M-plots
+
+Accumulated Local Effect plots modify the above by taking the _conditional_ expection over the remaining predictors, _given_ the value of the predictor of interest. 
+
+$$ f_M(x; \hat \theta) = \mathbb{E}_{Y,Z|X=x}[f (x, Y, Z; \hat \theta)]$$
+
+To evaluate this conditional expectation, we only consider observations that have $X$ values close to each $x$ we consider: that is those points in $B_x(\delta) = \{x' : |x' - x| < \delta\}$. 
+
+
+![](./images/Sketches-4.png)
+
+__Question:__ What do we have to balance when picking $\delta$?
+
+So we approximate the conditional expectation by:
+
+$$ f_M(x;\hat\theta) = \mathbb{E}_{Y,Z|X=x}[f (x, Y, Z; \hat \theta)] \approx \frac{1}{N(B_x(\delta))} \sum_{\{i: x_i \in B_x(\delta)\}} f(x, y_i, z_i; \hat\theta),$$
+
+where $N(S)$ denotes the number of observations lying in subset $S$ of the predictor space. 
+
+![](./images/Sketches-5.png)
+
+
+### ALE plots
+
+Rather than only basing our estimate on the small number of points that have $X$ values close to $x$, we instead use all observations that have values less than $x$.
+
+To do that we: 
+
+- Find $x_0 \leq \min x_i$
+- Split $(x_0, x)$ into $m$ intervals $I_1, \ldots, I_m$ of length $\epsilon_1, \ldots, \epsilon_m$
+  - standard case has all intervals of equal length
+- Find the average value of $\partial f / \partial x$ using the data points in each interval
+  - this gives us an estimate of how increasing x over that range changes our response
+- Multiply each estimate by the interval length and add them up 
+  - this gives us an estimate of the cumulated effect of a particular $x$ value on our response. 
+  
+
+![](./images/Sketches-3.png)
+  
+Mathematically we can express this as $J = \lceil(x - x_0)/\epsilon\rceil$ be the index of the first interval endpoint that is above $x$
+
+$$f_{ALE}(x) = \sum_{j = 0}^J \underset{\text{ average } \partial f / \partial x \text{ for observations in } I_{j+1}}{\underbrace{\left( \frac{1}{N(I_{j+1})} \sum_{\{i:x_i \in I_{j+1}\}} \frac{\hat f(x_0 + (j+1)\epsilon, y_i, z_i) - \hat f(x_0 + j\epsilon, y_i, z_i) }{\epsilon}\right)}}. $$
+
+This leads us to many similar considerations about the width of the intervals. 
+
+- If we have dense observations of $x$, then lots of small intervals will better approximate $\partial f / \partial x$ and so better construct the ALE plot. 
+- If we have few observations in one interval then we have a very noisy estimate of $\partial f / \partial x$, which effects all the ALE at all higher values. 
+- If we have no observations in one interval, we cannot estimate the gradient there at all!
+
+- __Simple solution:__ adaptive interval widths to maintain equal sample sizes for gradient estimation. 
+
+----
+
+----
+
+### Predictive vs Prognostic covariates
+
+> A __prognostic__ biomarker provides information about the patient's overall cancer outcome, regardless of therapy.
+>
+> A __predictive__ biomarker gives information about the effect of a therapeutic intervention.
+
+Consider the following model: `outcome ~ age * sex * treatment` 
+
+__Question:__ Which of the following terms are prognostic and which are predictive?
+
+- `1`
+- `age `
+- `sex`
+- `treatment`
+- `age:sex`
+- `age:treatment`
+- `sex:treatment `
+- `age:sex:treatment`
+
+
+### Interactions in decision trees 
+
+> In general a decision tree with depth $k$ will include k-way interaction terms. 
+
+__Question:__ Why is this?
+
+### SHAP Quiz
+
+__Question:__ Can anyone explain a SHAP value?
+
+__Question:__ Can anyone explain how SHAP interactions extend this? 
+
+__Question:__ Why is this difficult?
+

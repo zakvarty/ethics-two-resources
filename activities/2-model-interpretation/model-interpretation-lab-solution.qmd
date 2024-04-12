@@ -1,0 +1,353 @@
+---
+title: "Ethics Part II - Week 2 Lab"
+subtitle: "Model Solution"
+author: "Zak Varty"
+format:
+  html:
+    theme: [litera]
+    toc: true
+    self-contained: true
+  pdf: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Set up
+
+```{r, warning=FALSE, message=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+## Load the `gapminder` data 
+
+Load the `gapminder` data from the file `gap.csv`. This contains information on the life expectancy at birth for 142 countries in 5 year increments from 1952 to 2007. Additional information is given on the continent to which each country belongs, the population of the country, and the natural log of the inflation adjusted gross domestic product per captia (in log USD).
+
+
+An economic sociologist is considering two regression models for this data: 
+
+$$ \mathcal{M}_1: Y_i \sim \mathrm{N}(\beta_0 + \beta_1 x_{1i},\  \sigma^2 ),$$
+
+$$ \mathcal{M}_2: Y_i \sim \mathrm{N}(\gamma_0 + \gamma_1 x_{1i} + \gamma_2 x_{2i},\  \tau^2 ),$$
+where for observation $i = 1,\ldots, n$:
+
+- $Y_i$ is the life expectancy for a given country;
+- $x_{1i}$ is the time in years since 1970;
+- $x_{2i}$ is the log GDP per capita.
+
+# Exploratory Plots 
+
+__Task 1:__ Create exploratory plots of this data to assess whether the proposed models seem reasonable.
+
+
+```{r}
+gap <- read_csv("gap.csv")
+gap <- mutate(.data = gap, year = year - 1970)
+```
+```{r}
+# Plot outcome against logGDP and colour by year
+ggplot(data = gap, mapping = aes(x = logGdpPerCap, y = lifeExp, group = year)) + 
+  geom_point(aes(color = year)) + 
+  theme_minimal()
+
+# Make trends clearer by adding a year-wise smooth  
+ggplot(data = gap, mapping = aes(x = logGdpPerCap, y = lifeExp, group = year)) + 
+  geom_smooth(aes(color = year),se = FALSE) + 
+  theme_minimal()
+
+# Focus on earliest observations  
+ggplot(
+  data = gap %>% filter(year < 1), 
+  mapping = aes(x = logGdpPerCap, y = lifeExp, group = year)) +
+  geom_point(aes(color = year)) +
+  geom_smooth(aes(color = year),se = TRUE) +
+  theme_minimal()
+```
+
+__Key Points:__ 
+
+- Under the assumed model, we would expect to see parallel and equally spaced lines in the second plot. 
+- The assumption of a linear effect of log GDP for fixed year seems reasonable for all years in central range of log GDP values, because the smoothed curves are approximately linear.
+- The conditional effect of logGDP potentially becomes sub-linear in the earliest years for the countries with highest GDP. 
+- Focusing in on these earliest years in the third plot, there is very little data in this part of the predictor space.
+- In the second plot, the smoothed curves are (approximately) increasing with year for a given log GDP. However, the assumed equal effect of each additional year for a fixed logGDP or across all logGDPs are questionable.
+- While clearly an approximation, a linear model without interaction terms may provide a meaningful baseline model for this data.
+
+# Interpreting Coefficients
+
+__Task 2:__ Explain to the sociologist why you or would not expect the regression coefficients $\beta_0$ and $\gamma_0$ to take the same value. 
+
+We would not expect $\beta_0$ and $\gamma_0$ to take the same value. $\beta_0$ describes the mean life expectancy in 1970 for a country of unknown GDP, while $\gamma_0$ describes the mean life expectancy in 1970 for a country with a log GDP per capita of 0. 
+
+The plot below shows the distribution of log GDPs per capita in 1967 and 1972, showing that the predictor combination that $\gamma_0$ describes is far from typical. 
+
+```{r}
+ggplot(data = gap, aes(x = logGdpPerCap)) +
+  geom_density(data = gap %>% filter(year == -3)) + 
+  geom_density(data = gap %>% filter(year == 2), linetype = 2) +
+  xlim(0, 12)
+```
+
+__Task 3:__ Explain to the sociologist why you or would not expect the regression coefficients $\beta_1$ and $\gamma_1$ to take the same value.  
+
+We would not expect $\beta_1$ and $\gamma_1$ to take the same value because they describe different effects. Following similar reasoning to that outlined above: 
+
+- $\beta_1$ describes the _marginal_ effect caused by one year passing on the mean life expectancy of a country where the GDP per capita is unknown;   
+- $\gamma_1$ describes the _conditional_ effect caused by one year passing on the mean life expectancy of a country where the GDP per capita is known and held constant.
+
+__Task 4:__ Fit both models and and interpret the estimated parameters, $\hat \theta_1 = (\hat\beta, \hat \sigma)$ and $\hat \theta_2 = (\hat\gamma, \hat \tau)$, for the sociologist. 
+
+```{r}
+model_1 <- lm(lifeExp ~ 1 + year, data = gap)
+model_2 <- lm(lifeExp ~ 1 + year + logGdpPerCap, data = gap)
+```
+
+
+```{r}
+summary(model_1)
+confint(model_1, level = 0.95)
+```
+
+Assuming $\mathcal{M}_1$, our point estimate for the global mean life expectancy in 1970 is 56.4 years and the interval (55.7, 57.1) years covers the true global mean life expectancy with approximate probability 0.95. Similarly, a point estimate (and 95% confidence interval) for the effect of each additional year that passes is an additional 0.33 (0.29,0.35) years added to the mean life expectancy. The estimated standard deviation of the error terms within this model is $\hat\sigma =$ 11.6 years. 
+
+```{r}
+summary(model_2)
+confint(model_2, level = 0.95)
+```
+Assuming $\mathcal{M}_2$ the estimated life expectancy in 1970 for a country with an inflation adjusted GDP per capita of 1 US\$ is -5.77 years with an associated 95% confidence interval of (-7.98,-3.59) years. The nonsensical interpretation of this intercept term is attributable to such a GDP being extremely unusual in the context of the collected data. 
+
+For each additional year, assuming the GDP per captia of a country remains fixed, the life expectancy in that country is expected to increase by 0.20 years with an approximate 95\% confidence interval of (0.17,0.22). 
+
+
+In a given year, each additional log-dollar a country has of log-GDP per capita increases life expectancy in that country in expectation by 7.77 years. An approximate 95\% confidence interval for this effect is (7.49,8.05) years.
+
+The estimated standard deviation of the error terms within this model is $\hat\tau =$ 6.9 years. 
+
+# Explaining Paradoxes
+
+__Task 5:__ Explain Simpson's paradox for the sociologist, using this data as a contextual example. Investigate whether this effect is apparent when comparing the models $\mathcal{M_1}$ and 
+
+$$ \mathcal{M}_3:  Y_i \sim \mathrm{N}(\delta_0 + \delta_1 x_{1i} + \delta_2 x_{1i}x_{3i},\  \tau^2 ),$$
+
+where $x_{3i}$ is an factor encoding the continent associated with observation $i$.
+
+Simpson's paradox or Simpson's effect is a phenomenon in which the effect of a predictor is very different depending on whether another predictor is acknowledged in the model.
+
+For example, we might consider the two plots below. When groups information is not available or not included, then the predictor appears to have a negative association with the outcome. However, when this group information is available the effect is very different; so much so that it now has a positive association within each group. 
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(mgcv)
+var_x = 2 
+var_y = 1.5
+cov_xy = 1
+x_sep = 2 
+y_sep = 2
+sample_size = 75
+samples <- list()
+for (i in 1:5) {
+  samples[[i]] <- mgcv::rmvn(
+      n = sample_size,
+      mu = c(0 + i * x_sep, 10 - i * y_sep),
+      V = matrix(c(var_x, cov_xy, cov_xy, var_y), nrow = 2)
+    )
+}
+simpson_data <- do.call(rbind.data.frame, samples)
+simpson_data$group <- rep(1:5, each = sample_size)
+names(simpson_data) <- c("x", "y", "group")#
+
+par(mfrow = c(1,2))
+plot(
+  x = simpson_data$x,
+  y = simpson_data$y,
+  xlab = "predictor value",
+  ylab = "response value",
+  pch = 16)
+plot(
+  x = simpson_data$x,
+  y = simpson_data$y,
+  xlab = "predictor value",
+  ylab = "response value",
+  col = simpson_data$group + 1,
+  pch = 16)
+par(mfrow = c(1,1))
+```
+
+$\mathcal{M_3}$ allows for time to influence the life expectancy of countries differently, depending on the continent to which they belong. Simpson's effect may appear here by some (or all) continents failing to display the increasing trend that was seen in $\mathcal{M}_1$.
+
+This happens for Africa, where under $\mathcal{M}_3$ there is not strong evidence for a positive effect. 
+
+```{r}
+model_3 <- lm(lifeExp ~ 1 + year + year:continent,  data = gap)
+summary(model_3)
+```
+
+Note that this effect is attributable to $\mathcal{M}_3$ enforcing a common intercept for all continents. This can be demonstrated by fitting a fourth model, in which each continent may have an individual intercept and slope. 
+
+The previous assumption of a common intercept had reduced the apparent time effect for Africa. When allowing individual intercepts the time effect for Africa is shown to be similar to that of Oceania.
+
+```{r}
+model_4 <- lm(lifeExp ~ 1 + year*continent,  data = gap)
+summary(model_4)
+```
+The dubiousness of the common intercept assumed in $\mathcal{M}_3$ is much more apparent when the fitted model is represented graphically.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+par(mfrow = c(1,2))
+ggplot(data = gap, mapping = aes(x = year, y = lifeExp, group = continent)) + 
+  geom_point(mapping = aes(col = continent)) + 
+  geom_abline(
+    intercept = model_3$coefficients[1],
+    slope = model_3$coefficients[2],
+    col = scales::hue_pal()(5)[1],
+    lwd = 1.2) + 
+  geom_abline(
+    intercept = model_3$coefficients[1],
+    slope = model_3$coefficients[2] + model_3$coefficients[3],
+    col = scales::hue_pal()(5)[2],
+    lwd = 1.2) + 
+   geom_abline(
+    intercept = model_3$coefficients[1],
+    slope = model_3$coefficients[2] + model_3$coefficients[4],
+    col = scales::hue_pal()(5)[3],
+    lwd = 1.2) + 
+   geom_abline(
+    intercept = model_3$coefficients[1],
+    slope = model_3$coefficients[2] + model_3$coefficients[5],
+    col = scales::hue_pal()(5)[4],
+    lwd = 1.2) + 
+   geom_abline(
+    intercept = model_3$coefficients[1],
+    slope = model_3$coefficients[2] + model_3$coefficients[6],
+    col = scales::hue_pal()(5)[5],
+    lwd = 1.2) +
+  ggtitle("Graphical Summary of Model 3") + 
+  xlab("Years since 1970") + 
+  ylab("Life Expectancy (Years)") + 
+  theme_minimal()
+
+ggplot(data = gap, mapping = aes(x = year, y = lifeExp, group = continent)) + 
+  geom_point(mapping = aes(col = continent)) + 
+  geom_smooth(method = "lm", aes(col = continent), se = FALSE) + 
+  ggtitle("Graphical Summary of Model 4") + 
+  xlab("Years since 1970") + 
+  ylab("Life Expectancy (Years)") + 
+  theme_minimal()
+
+par(mfrow = c(1,1))
+```
+
+This example and the previous simulated example show that Simpson's effect can be generated either a deficiency in the available data or in the chosen model. 
+
+
+# Interpreting Opaque Models
+
+__Task 6:__ Fit a random forest model to predict life expectancy, where any of the other features within the `gap` data may be used as predictors. 
+
+Here we fit a random forest model by using the out-of-bag error. Further hyper-parameter tuning is possible, but is not the main focus of this course. For further details see the relevant lab from the supervised learning course. 
+
+```{r}
+library(randomForest)
+
+set.seed(1234)
+rf_model <- randomForest::randomForest(formula = lifeExp ~ ., data = gap)
+
+summary(rf_model)
+```
+
+For tasks 7 and 8 you may find functions from the `pdp` R package or `sklearn` Python module useful. 
+
+__Task 7:__ Produce an independent conditional expectation plot for one predictor in your fitted random forest model. Give an interpretation of this plot for the sociologist. 
+
+Combined solution to 7 and 8 given below.
+
+__Task 8:__ Produce a partial dependence plot for one predictor in your fitted random forest model. Give an interpretation of this plot for the sociologist, making clear how this differs from the previous plot. 
+
+
+An individual conditional expectation plot shows the predicted outcome for a given individual or observation as the value of one or more predictors are counter-factually adjusted and all other predictors are held constant. 
+
+These are shown in the left hand plot below by translucent grey curves. These curves are approximately straight lines sloping upward, indicating a positive linear trend in our random forest's predictions over time. 
+
+The darker bands in this plot indicate predictions that take different levels, due to the values taken by other predictors. This can be accounted for by "anchoring" each curve to start at 0 to allow easier comparison, as in the right hand plot. These are known as centred ICE plots and allow us to better see that the positive effect of time is smaller at later times. 
+
+The red curve shown in the left hand plot is a partial dependence plot for the effect of time on the predicted value of a country's life expectancy. This curve is formed by taking the point-wise mean of the ICE curves. 
+
+The partial dependence plot therefore represents the effect of changing the time predictor when averaged over the joint distribution of all the other predictors. This is in contrast to the ICE plots which consider the effect for particular values of those predictors.
+
+The partial dependence plot conveys the same information about the approximate linearity of this relationship. However, it also disguises that the variability in this effect size is increasing as time progresses; this can be seen clearly in the centred ICE plots but not the centred partial dependence plot.
+
+
+```{r}
+par(mfrow = c(1,2))
+pdp::partial(
+  object = rf_model, 
+  pred.var = "year", 
+  plot = TRUE,
+  rug = TRUE,
+  ice = TRUE,
+  alpha = 0.1, 
+  center = FALSE)
+pdp::partial(
+  object = rf_model, 
+  pred.var = "year", 
+  plot = TRUE,
+  rug = TRUE,
+  ice = TRUE,
+  alpha = 0.1, 
+  center = TRUE)
+```
+
+# Bonus
+
+__Task 9 (bonus):__ Write your own code to re-create the previous ICE plot and PDP. 
+
+```{r}
+n_pred <- 51
+
+prediction_years <- seq(
+  from = min(gap$year),
+  to = max(gap$year),
+  length.out = n_pred) 
+
+# Construct a series of counter-factual observations 
+# for each observation and possible "time" value
+
+counterfactual <- gap[rep(1:NROW(gap), each = 51),]
+counterfactual$year <- rep(prediction_years, NROW(gap))
+
+# Make a prediction in each counter factual scenario
+counterfactual_prediction <- predict(
+  object = rf_model,
+  newdata = counterfactual)
+
+# Store as matrix for ease of computation.
+# (one row per individual, one column per counter factual value)
+prediction_matrix <- matrix(
+  counterfactual_prediction,
+  nrow = NROW(gap), 
+  ncol = 51,
+  byrow = TRUE) 
+
+pdp_values <- colMeans(prediction_matrix)
+
+# Construct overlaid ICE and PDP plot.
+plot(
+  x = prediction_years,
+  y = pdp_values,
+  ylim = range(prediction_matrix),
+  type = "n",
+  ylab = "predicted value",
+  xlab = "year, relative to 1970")
+
+for (i in 1:NROW(prediction_matrix)) {
+  lines(
+    x = prediction_years,
+    y = prediction_matrix[i,],
+    col = rgb(0,0,0,0.1))
+}
+
+lines(x = prediction_years, y = pdp_values, col = 2, lwd = 2)
+```
