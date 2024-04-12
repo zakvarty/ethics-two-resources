@@ -1,0 +1,1 @@
+Use Assessment 2 and Q1 of Assessment 3 last year. Consider adding comprehension qustions about the assigned reading. Potentially add question about d-separation. 
