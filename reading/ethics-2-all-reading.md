@@ -78,7 +78,7 @@ You should write your rhetorical precis on the following reading.
 
     - [Chapter 9](https://mixtape.scunning.com/09-difference_in_differences), Difference-in-Differences.
 
-<!-- 
+
 
 ### Ethics 2: Week 4 Reading - Randomised Control Trials and A/B Testing
 
@@ -93,22 +93,23 @@ You should write your rhetorical precis on the following reading (Due Thursday a
 
 - [Kendall J. M. (2003)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1726034/). Designing a research project: randomised controlled trials and their principles. Emergency medicine journal : EMJ, 20(2), 164–168. 
 
-- [Kohavi, R., Tang, D., Xu, Y., Hemkens, L. G., & Ioannidis, J.  (2020)](https://link.springer.com/article/10.1186/s13063-020-4084-y). Online randomized controlled experiments at scale: lessons and  extensions to medicine. Trials, 21(1), 1-9.
+- [Kohavi, R., Tang, D., Xu, Y., Hemkens, L. G., & Ioannidis, J.  (2020)](https://doi.org/10.1186/s13063-020-4084-y). Online randomized controlled experiments at scale: lessons and  extensions to medicine. Trials, 21(1), 1-9.
 
 
 #### Supplementary Reading
 
 - [Kirkwood, B. R., & Sterne, J. A. (2010)](https://library-search.imperial.ac.uk/permalink/44IMP_INST/mek6kh/alma9910990550001591). Essential medical statistics. John Wiley & Sons. (Part F - Chapter 34, particularly §34.2)
 
-- [Kohavi, Tang, D., & Xu, Y. (2020)](https://link.springer.com/article/10.1186/s13063-020-4084-y). Trustworthy online controlled experiments: a practical guide to A/B testing. Cambridge University Press. (Chapter 17 - Statistics of Online Controlled Experiments)
+- [Kohavi, Tang, D., & Xu, Y. (2020)](https://doi.org/10.1186/s13063-020-4084-y). Trustworthy online controlled experiments: a practical guide to A/B testing. Cambridge University Press. (Chapter 17 - Statistics of Online Controlled Experiments)
 
-- [Hahn S. (2012)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3510268/). Understanding noninferiority trials. Korean journal of pediatrics, 55(11), 403–407. https://doi.org/10.3345/kjp.2012.55.11.403
+- [Hahn S. (2012)](https://doi.org/10.3345/kjp.2012.55.11.403). Understanding noninferiority trials. Korean journal of pediatrics, 55(11), 403–407.
 
 
 _Multi-Armed Bandits:_
 
 Multi-armed bandits can be viewed as an extension of A/B testing to a greater number of options (arms) where the probability of each option being shown to the user adapts as we gather more information. These techniques will be explored in detail during the Reinforcement Learning module next year.
 
+<!-- 
 ### Ethics 2: Week 5 Reading - Communicating Uncertainty
 
 #### Assessed Reading
