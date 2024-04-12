@@ -1,0 +1,68 @@
+---
+title: "Ethics Part II - Week 2 Lab"
+subtitle: "Question Sheet"
+author: "Zak Varty"
+format:
+  html:
+    theme: [litera]
+    toc: true
+    self-contained: true
+  pdf: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Set up
+
+## Load the `gapminder` data 
+
+Load the `gapminder` data from the file `gap.csv`. This contains information on the life expectancy at birth for 142 countries in 5 year increments from 1952 to 2007. Additional information is given on the continent to which each country belongs, the population of the country, and the natural log of the inflation adjusted gross domestic product per captia (in log USD).
+
+
+An economic sociologist is considering two regression models for this data: 
+
+$$ \mathcal{M}_1: Y_i \sim \mathrm{N}(\beta_0 + \beta_1 x_{1i},\  \sigma^2 ),$$
+
+$$ \mathcal{M}_2: Y_i \sim \mathrm{N}(\gamma_0 + \gamma_1 x_{1i} + \gamma_2 x_{2i},\  \tau^2 ),$$
+where for observation $i = 1,\ldots, n$:
+
+- $Y_i$ is the life expectancy for a given country;
+- $x_{1i}$ is the time in years since 1970;
+- $x_{2i}$ is the log GDP per capita.
+
+# Exploratory Plots 
+
+__Task 1:__ Create exploratory plots of this data to assess whether the proposed models seem reasonable.
+
+# Interpreting Coefficients
+
+__Task 2:__ Explain to the sociologist why you or would not expect the regression coefficients $\beta_0$ and $\gamma_0$ to take the same value. 
+
+__Task 3:__ Explain to the sociologist why you or would not expect the regression coefficients $\beta_1$ and $\gamma_1$ to take the same value.  
+
+__Task 4:__ Fit both models and and interpret the estimated parameters, $\hat \theta_1 = (\hat\beta, \hat \sigma)$ and $\hat \theta_2 = (\hat\gamma, \hat \tau)$, for the sociologist. 
+
+# Explaining Paradoxes
+
+__Task 5:__ Explain Simpson's paradox for the sociologist, using this data as a contextual example. Investigate whether this effect is apparent when comparing the models $\mathcal{M_1}$ and 
+
+$$ \mathcal{M}_3:  Y_i \sim \mathrm{N}(\delta_0 + \delta_1 x_{1i} + \delta_2 x_{1i}x_{3i},\  \tau^2 ),$$
+
+where $x_{3i}$ is an factor encoding the continent associated with observation $i$.
+
+# Interpreting Opaque Models
+
+__Task 6:__ Fit a random forest model to predict life expectancy, where any of the other features within the `gap` data may be used as predictors. 
+
+For tasks 7 and 8 you may find functions from the `pdp` R package or `sklearn` Python module useful. 
+
+__Task 7:__ Produce an independent conditional expectation plot for one predictor in your fitted random forest model. Give an interpretation of this plot for the sociologist. 
+
+__Task 8:__ Produce a partial dependence plot for one predictor in your fitted random forest model. Give an interpretation of this plot for the sociologist, making clear how this differs from the previous plot. 
+
+# Bonus
+
+__Task 9 (bonus):__ Write your own code to re-create the previous ICE plot and PDP. 
+
