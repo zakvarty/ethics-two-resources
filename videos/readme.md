@@ -17,15 +17,14 @@ The local version of this folder contains the mp4 files for the following lectur
 
 ## Week 3 - Introduction to Causality
 
-- Video Title
-- Video Title
-- Video Title
+- Understanding bias
+- Confounders
+- Colliders
 
 ## Week 4 - Randomised Control Trials and A/B Testing
 
-- Video Title
-- Video Title 
-- Video Title
+- Randomised control trials
+- A/B testing
 
 ## Week 5 - Communicating Uncertainty
 
