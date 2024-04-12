@@ -12,9 +12,8 @@ The local version of this folder contains the mp4 files for the following lectur
 
 ## Week 2 - Local Effects and Interactions
 
-- Video Title
-- Video Title
-- Video Title
+- Accumulated local effect plots
+- Understanding interactions
 
 ## Week 3 - Introduction to Causality
 
