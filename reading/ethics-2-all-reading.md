@@ -54,18 +54,18 @@ You should write your rhetorical precis on the following reading.
 
 - [Interpretable Machine Learning: Chapter 9.5 & 9.6 - Shapley values and SHAP](https://christophm.github.io/interpretable-ml-book/shapley.html)
 
-<!--
+
 ### Ethics 2: Week 3 Reading - Bias and Causality
 
 #### Assessed Reading
  
- You should write your rhetorical precis on the following reading (Due Thursday at 23:59).
+ You should write your rhetorical precis on the following reading.
 
-> [Chesnaye, N. C., et. al. (2022)](https://academic.oup.com/ckj/article/15/1/14/6358134). An introduction to inverse probability of treatment weighting in observational research. Clinical Kidney Journal, 15(1), 14-20.
+> [Chesnaye, N. C., et. al. (2022)](https://doi.org/10.1093/ckj/sfab158). An introduction to inverse probability of treatment weighting in observational research. Clinical Kidney Journal, 15(1), 14-20.
 
 #### Core Reading 
 
-- Huntington-Klein, N.C. (2022) The Effect: An Introduction to Research Design and Causality. 
+- Huntington-Klein, N.C. (2022). The Effect: An Introduction to Research Design and Causality. 
 
     - [Chapter 6](https://theeffectbook.net/ch-CausalDiagrams.html), Causal Diagrams. 
     - [Chapter 7](https://theeffectbook.net/ch-DrawingCausalDiagrams.html), Drawing Causal Diagrams.
@@ -74,11 +74,13 @@ You should write your rhetorical precis on the following reading.
 
 #### Supplementary Reading
 
-- Cunningham, S. (2021) Causal Inference: The Mixtape. 
+- Cunningham, S. (2021). Causal Inference: The Mixtape. 
 
     - [Chapter 9](https://mixtape.scunning.com/09-difference_in_differences), Difference-in-Differences.
 
-    ### Ethics 2: Week 4 Reading - Randomised Control Trials and A/B Testing
+<!-- 
+
+### Ethics 2: Week 4 Reading - Randomised Control Trials and A/B Testing
 
 #### Assessed Reading
 

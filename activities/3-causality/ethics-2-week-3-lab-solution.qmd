@@ -1,0 +1,393 @@
+---
+title: "Ethics Part II - Week 3 Lab"
+subtitle: "Solution Sheet"
+author: "Zak Varty"
+format:
+  html:
+    theme: [litera]
+    toc: true
+    self-contained: true
+  pdf: default
+---
+
+# Causal Networks, Colliders and Confounders 
+
+A principle investigator is designing a study to estimate the direct effect of a treatment $X$ on outcome $Y$. They have constructed the following causal network, including measurable covariates $A$-$F$.
+
+```{r}
+#| echo: false
+#| fig-align: center
+#| out-width: 50%
+knitr::include_graphics("./causal_network-1.png")
+```
+
+__(a)__ Identify all causal paths between the treatment and outcome.
+
+_Solution:_
+
+\begin{align*}
+     &X \rightarrow Y \\ 
+     &X \rightarrow E \leftarrow F \rightarrow Y \\
+     &X \leftarrow A \rightarrow D \rightarrow Y \\
+     &X \leftarrow A \rightarrow B \rightarrow C \rightarrow Y.
+ \end{align*}
+
+__(b)__ By identifying colliders and confounders along these paths, explain which of these paths are open and which are closed when no covariates are controlled for.
+
+_Solution:_
+
+\begin{align*}
+     &X \rightarrow Y  (\text{open, no colliders on path})\\ 
+     &X \rightarrow E \leftarrow F \rightarrow Y  (\text{closed by collider E}) \\
+     &X \leftarrow A \rightarrow D \rightarrow Y (\text{open, no colliders on path}) \\
+     &X \leftarrow A \rightarrow B \rightarrow C \rightarrow Y (\text{open, no colliders on path}). \\
+\end{align*}
+
+__(c)__ Identify the smallest set of variables to control for such that all backdoor paths are closed in this investigation.
+
+_Solution:_ Conditioning on $A$ will close the two open paths than contain $A$, leaving the direct effect as the only open causal path.  
+
+__(d)__ Identify a second, complementary, set of control variables that would also close all backdoor paths. 
+
+_Solution:_ Conditioning on $D$ and at least one of $B$ or $C$ would also close the open backdoor paths. 
+
+# ATE and Weighted Estimation 
+
+MachineLearners is a start-up company developing educational software. 
+Rather than teaching students by asking them questions in a predetermined, increasing level of difficulty, their software
+uses a machine learning algorithm to pose questions in a personalised order that is thought be of the greatest educational value to the student.
+
+The MachineLearners team has conducted a trial to demonstrate the effectiveness of their system.
+They recruited students to their trial and asked them to take a baseline assessment. 
+Each student in the trial was then assigned to either the control group or the treatment group.
+The control group were asked practice questions in a predetermined order, while the ordering of questions for the treatment group students was decided by the MachineLearner software.
+Finally, a follow up test was given to all students.
+
+The results of these tests are given in the file `trial-data.csv`. 
+
+__(a)__ Calculate a point estimate for the average treatment effect of the machine learner approach: that is, the expected improvement for a random individual if they practice with the MachineLearners ordering rather than the standard ordering.
+
+__Solution:__
+
+We begin by loading the relevant data.
+
+```{r load-data-and-packages }
+#| warning: false
+#| message: false
+library(dplyr)
+library(readr)
+
+trial <- read_csv("trial_data.csv")
+school <- read_csv("school_data.csv")
+survey <- read_csv("survey_data.csv")
+```
+
+Some initial, graphical exploration of the data shows that both the treatment and control groups tend to improve on second testing. Additionally, the treatment group tends to improve more on second testing. This size of this improvement is generally larger and more variable for larger baseline scores. To see this effect more clearly, we can consider the score difference for each individual.
+
+```{r, 2a-plots}
+#| code-fold: true 
+#| code-summary: "Code for exporatory plots"
+#| fig-show: hold
+trial$score_diff <- trial$final_score - trial$initial_score
+
+par(mfrow = c(1,2), mar = c(5.1,4.1,2.1,2.1))
+# Left hand plot Initial vs Final Score
+plot(
+  x = trial$initial_score,
+  y = trial$final_score, 
+  col = trial$is_treated + 1,
+  xlab = "Initial score",
+  ylab = "Final score",
+  xlim = c(50, 200),
+  ylim = c(50,250),
+  bty = "n")
+abline(a = 0 , b = 1, lwd = 2)
+legend(
+  'topleft',
+  legend = c("control", "treatment"),
+  col = c(1,2),
+  pch = c(1,1), 
+  bty = "n")
+legend(
+  'bottomright',
+  legend = c("y = x") ,
+  lty = 1,
+  lwd = 2, 
+  bty = "n")
+# Right hand plot - Score Change grouped by treatment
+plot(
+  x = trial$is_treated,
+  y = trial$score_diff,
+  xlab = "",
+  xlim = c(-1,2),
+  xaxt = "n",
+  col = trial$is_treated + 1,
+  ylab = "Score Change",
+  bty = "n")
+abline(
+  h = mean(trial$score_diff[trial$is_treated == 0]),
+  col = 1,
+  lwd = 2,
+  lty = 2)
+abline(
+  h = mean(trial$score_diff[trial$is_treated == 1]),
+  col = 2, 
+  lwd = 2,
+  lty = 2)
+abline(h = 0, lwd = 2)
+legend(
+  'topleft',
+  legend = c("control", "treatment"),
+  col = c(1,2),
+  pch = c(1,1), 
+  bty = "n")
+par(mfrow = c(1,1))
+```
+
+We want to estimate the average treatment effect of the MachineLearners system over all students, in isolation from the retesting effect. We therefore consider the difference between the treatment and control groups of the expected score change on retesting (as indicated by the dashed lines in the right plot).
+
+For the control group, the expected score change is given by: 
+
+$$ \mathbb{E}(Y_1 - Y_0| T = 0) \approx \frac{1}{|\{i:t_i = 0\}|} \sum_{\{i:t_i = 0\}} (y_{1i} - y_{0i}) = 13.5,$$ 
+
+While for the treatment group it is: 
+
+$$ \mathbb{E}(Y_1 - Y_0| T = 1) \approx  \frac{1}{|\{i:t_i = 1\}|}\sum_{\{i:t_i = 1\}} (y_{1i} - y_{0i}) = 45.4.$$ 
+
+Based on this trial, a point estimate for the treatment effect of the MachineLearner ordering system is an increase of \underline{45.4 - 13.5 = 31.9 points}. 
+
+```{r}
+#| code-fold: true
+#| code-summary: "Code for ATE calculations"
+#| message: false
+trial %>%
+  group_by(is_treated) %>%
+  mutate(score_diff = final_score - initial_score) %>%
+  select(score_diff) %>%
+  summarise(mean_score_diff = mean(score_diff))
+```
+
+__(b)__ Using a non-parametric bootstrap approach, construct an approximate 95% confidence
+interval for the average treatment effect of the MachineLearners software.
+
+_Solution:_
+
+The non-parametric bootstrap approach is outlined below, followed by an implementation in R.
+
+- Let $M$ be a large integer. 
+
+- For $i = 1,\ldots,M$,
+
+  1. resample with replacement $n_0 = 255$ score differences from those of the control group and calculate their mean $\bar d_0$. 
+  2. resample with replacement $n_1 = 277$ score differences from those of the treatment group and calculate their mean $\bar d_1$. 
+  3. record the bootstrapped difference of group means $d^{(i)} = \bar d_1 - \bar d_0$.   
+
+- Finally, calculate the $2.5^{\text{th}}$ and $97.5^{\text{th}}$ percentiles of $\{d^{(1)}, \ldots, d^{(M)}\}$ to form an approximate 95\% confidence interval for the average treatment effect. 
+
+Doing so produces an interval of $(29.54, 34.39)$ for the expected increase points attributable to the MachineLearners algorithm.
+
+```{r 2b-bootstrap}
+set.seed(1234)
+n_treatment <- sum(trial$is_treated == 1)
+n_control <- sum(trial$is_treated == 0)
+
+score_diffs_treatment <- trial$score_diff[trial$is_treated == 1]
+score_diffs_control <- trial$score_diff[trial$is_treated == 0]
+
+M <- 500000
+bootstrap_mean_differences <- rep(NA, M)
+
+for (i in 1:M) {
+  # resample score differences from treatment and control groups
+  boot_sample_0 <-  sample(score_diffs_control, n_control, replace = TRUE)
+  boot_sample_1 <-  sample(score_diffs_treatment, n_treatment, replace = TRUE)
+
+  bootstrap_mean_difference <-  mean(boot_sample_1) - mean(boot_sample_0)
+  bootstrap_mean_differences[i] <- bootstrap_mean_difference
+}
+quantile(bootstrap_mean_differences, probs = c(0.025, 0.975))
+```
+
+A colleague at MachineLearners is concerned that the students recruited for the study might not be representative of their target market for the product. 
+They realised that female students may be over represented in the study because two popular schools in the area, both of which take only female students.
+
+__(c)__ Additional student information is contained in `school-data.csv`. Use this information and a non-parametric bootstrap approach to construct an approximate 95% confidence interval for the difference in the average treatment effect for male and female students. What implications does this have for the effectiveness of the MachineLearners system when used by their target
+demographic?
+
+_Solution:_ 
+
+Again we outline the non-parametric bootstrap approach to obtain a confidence interval and then give an implementation in R.
+
+- Let $M$ be a large integer. 
+
+- For $i = 1,\ldots,M$,
+
+  1. resample with replacement $n_{0m} = 93$ score differences from those of the control group males and calculate their mean $\bar d_{0m}$. 
+  1. resample with replacement $n_{1m} = 87$ score differences from those of the treatment group males and calculate their mean $\bar d_{1m}$. 
+  1. calculate the bootstrapped difference of male group means $d^{(i)}_m = \bar d_{1m} - \bar d_{0m}$.   
+  1. resample with replacement $n_{0f} = 162$ score differences from those of the control group females and calculate their mean $\bar d_{0m}$. 
+  1. resample with replacement $n_{1f} = 190$ score differences from those of the treatment group females and calculate their mean $\bar d_{1m}$. 
+  1. calculate the bootstrapped difference of female group means $d^{(i)}_f = \bar d_{1f} - \bar d_{0f}$.  
+  1. record the difference in the bootstrap estimates of the average treatment effect: $d^{(i)} = d^{(i)}_f - d^{(i)}_m$
+
+- Finally, calculate the $2.5^{\text{th}}$ and $97.5^{\text{th}}$ percentiles of $\{d^{(1)}, \ldots, d^{(M)}\}$ to form an approximate 95\% confidence interval for the average treatment effect. 
+
+
+```{r}
+set.seed(1234)
+# Join tables so that gender information is available
+trial <- dplyr::left_join(trial, school, by = "id")
+
+# Indicator vectors for treatment/control male/female combinations
+is_treatment_male <- trial$is_treated == 1 & trial$gender == "male"
+is_control_male <- trial$is_treated == 0 & trial$gender == "male"
+is_treatment_female <- trial$is_treated == 1 & trial$gender == "female"
+is_control_female <- trial$is_treated == 0 & trial$gender == "female"
+
+# Size of each group
+n_tm <- sum(is_treatment_male)
+n_cm <- sum(is_control_male)
+n_tf <- sum(is_treatment_female)
+n_cf <- sum(is_control_female)
+
+# Observed changes in test score for each group
+score_diffs_tm <- trial$score_diff[is_treatment_male]
+score_diffs_cm <- trial$score_diff[is_control_male]
+score_diffs_tf <- trial$score_diff[is_treatment_female]
+score_diffs_cf <- trial$score_diff[is_control_female]
+
+## Construct Bootstrap confidence interval
+M <- 1000000
+bootstrap_mean_differences <- rep(NA, M)
+
+for (i in 1:M) {
+  # resample score differences from treatment and control groups by gender
+  boot_sample_tm <-  sample(score_diffs_tm, n_tm, replace = TRUE)
+  boot_sample_cm <-  sample(score_diffs_cm, n_cm, replace = TRUE)
+  boot_sample_tf <-  sample(score_diffs_tf, n_tf, replace = TRUE)
+  boot_sample_cf <-  sample(score_diffs_cf, n_cf, replace = TRUE)
+
+  # calculate gender specific mean treatment effects
+  bootstrap_mean_diff_m <-  mean(boot_sample_tm) - mean(boot_sample_cm)
+  bootstrap_mean_diff_f <-  mean(boot_sample_tf) - mean(boot_sample_cf)
+
+  # calculate and record difference in mean treatment effect between genders
+  bootstrap_mean_difference <- bootstrap_mean_diff_f - bootstrap_mean_diff_m
+  bootstrap_mean_differences[i] <- bootstrap_mean_difference
+}
+
+quantile(bootstrap_mean_differences, probs = c(0.025, 0.975))
+
+```
+
+This an 95% confidence interval of $(19.48, 26.52)$ for the expected treatment effect difference between males and females, where the expected improvement is greater for females.
+
+The MachineLearners software is more effective for female students and female students are over represented in the trial. This means that the trial results will be overly optimistic about the benefits of the software in the target market.  
+
+
+__(d)__ The file `survey.csv` contains the results of a recent survey of the target market. Use the results of this survey and an appropriate weighting scheme to find a point estimate for the average treatment effect of the MachineLearners system, when used by students from their
+target market.
+
+_Solution:_
+
+Splitting the trial data by gender and proceeding as for part (a), we can estimate the gender specific expected treatment effect of the MachineLearners software.
+
+This gives an expected treatment effect of 39.1 points for females and 16.2 points for males. 
+
+From the survey data, the sample proportion of females in the target population is $\hat p = 0.523$.
+
+We then weight the gender specific expected treatment effects to obtain a point estimate for expected treatment effect in the target population of $39.1 \times \hat p + 16.2 \times (1 - \hat p) = 28.4$ points.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Supporting R Code"
+#| output: false
+# Sample proportion of females in target population
+sample_prop_female = mean(survey$gender == "female")
+
+trial %>%
+  filter(gender == "male") %>%
+  group_by(is_treated) %>%
+  mutate(score_diff = final_score - initial_score) %>%
+  select(score_diff) %>%
+  summarise(mean_score_diff = mean(score_diff))
+
+sample_treatment_effect_male <- 29.6 - 13.4
+
+trial %>%
+  filter(gender == "female") %>%
+  group_by(is_treated) %>%
+  mutate(score_diff = final_score - initial_score) %>%
+  select(score_diff) %>%
+  summarise(mean_score_diff = mean(score_diff))
+
+sample_treatment_effect_female <- 52.6 - 13.5
+
+treatment_effect_target_population <-
+  sample_prop_female * sample_treatment_effect_female +
+  (1 - sample_prop_female) * sample_treatment_effect_male
+
+treatment_effect_target_population
+
+```
+
+__(e)__ Using a non-parametric bootstrap approach, construct an approximate 95% confidence interval for the treatment effect of the MachineLearners system, when used by students from their target market. 
+
+_Solution:_ Again we use a non-parametric bootstrap approach to obtain a confidence interval. This builds on the solution to part (c) and we take care to properly incorporate our uncertainty about the proportion of the target population who are female.
+
+- Let $M$ be a large integer. 
+
+- For $i = 1,\ldots,M$,
+
+  1. resample with replacement $n_{0m} = 93$ score differences from those of the control group males and calculate their mean $\bar d_{0m}$. 
+  1. resample with replacement $n_{1m} = 87$ score differences from those of the treatment group males and calculate their mean $\bar d_{1m}$. 
+  1. calculate the bootstrapped difference of male group means $d^{(i)}_m = \bar d_{1m} - \bar d_{0m}$.   
+  1. resample with replacement $n_{0f} = 162$ score differences from those of the control group females and calculate their mean $\bar d_{0m}$. 
+  1. resample with replacement $n_{1f} = 190$ score differences from those of the treatment group females and calculate their mean $\bar d_{1m}$. 
+  1. calculate the bootstrapped difference of female group means $d^{(i)}_f = \bar d_{1f} - \bar d_{0f}$.  
+  1. resample the survey data with replacement and calculate the proportion $p^*$ of females as a bootstrap estimate of the proportion in target population.
+  1. record the bootstrap estimates of the average treatment effect in the target population: $d^{(i)} = p^* d^{(i)}_f + (1-p^*) d^{(i)}_m$.
+
+- Finally, calculate the $2.5^{\text{th}}$ and $97.5^{\text{th}}$ percentiles of $\{d^{(1)}, \ldots, d^{(M)}\}$ to form an approximate 95\% confidence interval for the average treatment effect. 
+
+This is implemented in the following R code. 
+
+```{r}
+set.seed(1234)
+
+## Construct Bootstrap confidence interval
+M <- 1000000
+boot_population_treatment_effects <- rep(NA, M)
+
+for (i in 1:M) {
+
+  # resample score differences from treatment and control groups by gender
+  boot_sample_tm <-  sample(score_diffs_tm, n_tm, replace = TRUE)
+  boot_sample_cm <-  sample(score_diffs_cm, n_cm, replace = TRUE)
+  boot_sample_tf <-  sample(score_diffs_tf, n_tf, replace = TRUE)
+  boot_sample_cf <-  sample(score_diffs_cf, n_cf, replace = TRUE)
+
+  # calculate gender specific mean treatment effects
+  boot_mean_diff_m <-  mean(boot_sample_tm) - mean(boot_sample_cm)
+  boot_mean_diff_f <-  mean(boot_sample_tf) - mean(boot_sample_cf)
+
+  # resample proportion of females in target population
+  boot_prop_f <- mean(
+    sample(x = survey$gender == 'female',
+           size = nrow(survey),
+           replace = TRUE)
+  )
+  boot_prop_m <- 1 - boot_prop_f
+
+  # calculate and record the mean treatment effect in target population
+  boot_population_treatment_effects[i] <-
+    boot_prop_f * boot_mean_diff_f + boot_prop_m * boot_mean_diff_m
+}
+
+mean(boot_population_treatment_effects)
+quantile(boot_population_treatment_effects, probs = c(0.025, 0.975))
+```
+
+This produces an interval of $(26.51, 30.35)$ points for the expected treatment effect in the target population.
+
+-------
