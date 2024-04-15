@@ -28,9 +28,9 @@ The local version of this folder contains the mp4 files for the following lectur
 
 ## Week 5 - Communicating Uncertainty
 
-- Video Title
-- Video Title
-- Video Title 
+- Degrees of Evidence
+- Communicating Uncertainty
+
 
 
 
