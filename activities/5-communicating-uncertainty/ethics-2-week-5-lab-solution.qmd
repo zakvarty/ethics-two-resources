@@ -1,0 +1,187 @@
+---
+title: "Ethics Part II - Week 5 Lab"
+subtitle: "Solution Sheet"
+author: "Zak Varty"
+format:
+  html:
+    theme: [litera]
+    toc: true
+    self-contained: true
+  pdf: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+__Task 1:__ Pick one or more topic(s) that interest to you and that has been relatively well explored in the academic literature. Find one report/study relating to your chosen topic at each stage in the hierarchy of evidence. 
+
+- Anecdotal Evidence
+- Observational study with matched cases/controls
+- Prospective observational study (cohort study)
+- Randomised Control Trial
+- Systematic Review / Meta-analysis
+
+
+__Solution 1:__
+
+Finding a topic outside of medicine in which all levels of evidence are available can be challenging, so do not worry if you could not find one example of all levels from a single topic. I was surprised by how many of these levels could be covered by my chosen topic: flipped classroom teaching.
+
+- __Anecdotal Evidence:__ Fuchs, K. (2021). Evaluating the technology-enhanced flipped classroom through the students’ eye: a case study. Journal of e-learning Research, 1(2), 13-21.
+
+- __Observational study with matched cases/controls:__ Ryan, M. D., & Reid, S. A. (2016). Impact of the flipped classroom on student performance and retention: A parallel controlled study in general chemistry. Journal of Chemical Education, 93(1), 13-23. (note: matching is questionable here, but it was the closest I could find)
+
+- __Prospective observational study (cohort study):__ Burkhart, S. J., Taylor, J. A., Kynn, M., Craven, D. L., & Swanepoel, L. C. (2020). Undergraduate students experience of nutrition education using the flipped classroom approach: A descriptive cohort study. Journal of nutrition education and behavior, 52(4), 394-400.
+
+- __Randomised Control Trial.__ Wozny, N., Balser, C., & Ives, D. (2018). Evaluating the flipped classroom: A randomized controlled trial. The Journal of Economic Education, 49(2), 115-129.
+
+- __Systematic Review / Meta-analysis.__ Chen, Kuo‐Su, et al. "Academic outcomes of flipped classroom learning: a meta‐analysis." Medical education 52.9 (2018): 910-924.
+
+
+__Task 2:__ Consider an example of an online gaming company trying to predict in-game sales based on player demographic information. Give a short explanation of covariate shift, concept drift and prior shift in this context. 
+
+__Solution 2:__
+
+Covariate shift occurs when the marginal distribution of the predictors $\pi(X)$ changes over time. This might happen if the demographic of the gaming company's customers changes over time, for example by the proportion of female gamers increasing or the average age of gamers increasing. 
+
+Concept drift occurs when the conditional distribution of the response given the predictors $\pi(Y\ |\ X)$ changes over time. This might happen if the demographic of the company's customer's stays the same but due to challenging economic conditions, all customers make fewer in-game purchases with this reduction being larger for gamers with lower overall income. 
+
+Prior shift or target shift occurs when the marginal distribution of the response $\pi(Y)$ changes over time. This might happen if the overall distribution of in-game spending changes over time, when considered over all combinations of demographic predictors. 
+
+Note that since $\pi(Y) = \pi(Y \ |\  X) \pi(X)$, it can be difficult to isolate each of these types of data shift. 
+
+__Task 3:__ A Poisson GLM is used to model the number of faults (Y_i) in a rolls of cloth, each will different lengths (z_i):
+
+$$ Y_i \sim \text{Pois}(\lambda_i) \quad \text{where} \quad \log(\lambda_i) = \beta_0 + \beta_1 z_i.$$
+Using this Poisson regression as an example, explain the difference between a confidence interval, a credible interval and a prediction interval. 
+
+
+__Solution 3:__
+
+A confidence interval is a tool from frequentist statistics to quantify our certainty about the estimated value of model parameters. In this case, these would be the estimates the regression coefficients $\beta = (\beta_0, \beta_1)$. When calculating a $100(1-\alpha)\%$ confidence interval for 100 data sets we expect that $100 * (1-\alpha)$ of those intervals will cover the true values of the parameters $\beta^*$. 
+
+A $100(1-\alpha)\%$ credible interval is a similar tool from Bayesian statistics. Prior beliefs about the values of $(\beta_0, \beta_1)$ are combined with observed data values (cloth lengths and defect counts) to produce a posterior distribution that describes the updated beliefs about the mean number of defects (assuming cloth length is centred) and how this count is expected to change with cloth length. An interval (or region) is then constructed to contain $100(1-\alpha)\%$ of this posterior probability distribution. This is known as a credible interval. The most common ways of constructing a credible interval are either to use the central $100(1-\alpha)\%$ of the distribution, or else to include the  combinations of parameter values that have the highest posterior probability density.
+
+Both confidence and credible intervals describe uncertainty about model parameters, though the former considers uncertainty due to sampling variability and the latter considers subjective belief about the parameter values. A prediction interval instead considers uncertainty about future outcomes, or new $Y$ values. This involves both the uncertainty about the model parameters __and__ the variability in the response even when those parameters are known. A prediction interval describes our uncertainty about the number of defects in a new length of cloth, accounting for: uncertainty in the estimated number of defects in a cloth of average length, uncertainty in the estimated number of additional defects per unit length and variability in the observed number of defects when these two properties are known. These prediction intervals may be calculated in either a frequentist or a Bayesian setting. 
+
+
+__Task 4:__
+
+__Task 4:__ The files `point_estimates.csv`, `function_estimates.csv` and `map_estimates.csv` respectively contain bootstrapped estimates of a scalar valued outcome, a 1 dimensional functional outcome and a mapped outcome on a 2-dimensional grid. Explore at least two ways of visualising uncertainty in each of these cases. 
+
+```{r}
+#| include: false
+library(readr)
+library(ggplot2)
+library(magrittr)
+```
+
+```{r}
+#| message: false
+point_estimates <- read_csv("point_estimates.csv")
+
+# Boxplot with individual values added as rug
+point_estimates %>% 
+  ggplot(aes(x = sigma)) + 
+  geom_boxplot(fill = "lightblue") +
+  geom_rug() + 
+  theme_minimal() + 
+  theme(
+    axis.text.y = element_blank()
+  )
+
+# Similarly rug plot but using kernel density estimate instead
+point_estimates %>% 
+  ggplot(aes(x = sigma)) + 
+  geom_density(fill = "lightblue") + 
+  geom_rug() + 
+  theme_minimal()
+```
+
+```{r}
+function_estimates <- read_csv("function_estimates.csv")
+n <- nrow(function_estimates)
+library(dplyr)
+function_estimates %>% 
+  mutate(
+    func_mean = rowMeans(select(., starts_with("bootstrap_"))),
+    func_sd = apply(select(., starts_with("bootstrap_")), FUN = sd, MARGIN = 1)
+    )
+    func_upper = func_mean + 1.96 * func_sd / n 
+    func_lower = func_mean - 1.96 * func_sd / n 
+    func_qlow = apply(
+      X = select(., starts_with("bootstrap_")),
+      FUN = sd, 
+      MARGIN = 1,
+      probs = 0.025) 
+    func_qhigh = apply(
+      X = select(., starts_with("bootstrap_")),
+      FUN = sd, 
+      MARGIN = 1,
+      probs = 0.975) 
+
+```
+
+```{r, echo = "false"}
+#| include: false
+#a + b sin(omega * t)
+t <- seq(0, 5 * pi, length.out = 1001)
+V <- diag(c(1,0.1, 2))
+dat <- mgcv::r.mvt(n = 500, mu = c(5, 1, 2), V = V, df = 24)
+
+temp <- matrix(NA, nrow = 1001, ncol = 500)
+for (i in 1:500) {
+  a <- dat[i, 1]
+  b <- dat[i, 2]
+  c <- dat[i, 3]
+  temp[, i] <- a + b + sin(c * t)
+}
+temp <- as.data.frame(temp)
+colnames(temp) <- paste0("bootstrap_", 1:500)
+temp_2 <- data.frame(t = t)
+temp <- cbind(temp_2, temp)
+readr:::write_csv(temp, "function_estimates.csv")
+```
+
+```{r}
+#| include: false
+set.seed(1234)
+x <- seq(12000, 17500, by = 50)
+y <- seq(13500, 22500, by = 50)
+coords <- as.data.frame(expand.grid(x, y))
+colnames(coords) <- c("x", "y")
+
+mu_1 <- c(14500,14000)
+mu_2 <- c(16000, 16000)
+mu_3 <- c(17000, 19000)
+mu_4 <- c(14000, 18000)
+
+V_1 <- matrix(c(50000, 0.5, 0.5, 20000), nrow = 2)
+V_2 <- matrix(c(50000, 0, 0, 20000), nrow = 2)
+V_3 <- matrix(c(50000, 0.9, 0.9, 20000), nrow = 2)
+V_4 <- diag(c(500000,500000))
+
+
+for (i in 1:500) {
+  
+  x_1 <- mgcv::rmvn(n = 100, mu = mu_1, V = V_1)
+  x_2 <- mgcv::rmvn(n = 100, mu = mu_2, V = V_2)
+  x_3 <- mgcv::rmvn(n = 100, mu = mu_3, V = V_3)
+  x_4 <- mgcv::rmvn(n = 100, mu = mu_4, V = V_4)
+  pts <- rbind(x_1, x_2, x_3, x_4)
+  
+  #plot(pts, xlim = c(12000, 18000), ylim = c(13500, 22500))
+  
+  kde <- MASS::kde2d(
+  x = pts[,1], 
+  y = pts[,2],
+  n = c(length(x), length(y)),
+  lims = c(12000, 17500, 13500, 22500))
+  
+  coords[ ,i + 2] <- c(kde$z)
+}
+
+colnames(coords) <- c("x", "y", paste0("bootstrap_", 1:500))
+readr::write_csv(coords, "map_estimates.csv")
+```

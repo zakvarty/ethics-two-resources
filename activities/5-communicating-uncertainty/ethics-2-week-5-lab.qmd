@@ -1,0 +1,111 @@
+---
+title: "Ethics Part II - Week 5 Lab"
+subtitle: "Question Sheet"
+author: "Zak Varty"
+format:
+  html:
+    theme: [litera]
+    toc: true
+    self-contained: true
+  pdf: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+__Task 1:__ Pick one or more topic(s) that interest to you and that has been relatively well explored in the academic literature. Find one report/study relating to your chosen topic at each stage in the hierarchy of evidence. 
+
+- Anecdotal Evidence
+- Observational study with matched cases/controls
+- Prospective observational study (cohort study)
+- Randomised Control Trial
+- Systematic Review / Meta-analysis
+
+__Task 2:__ Consider an example of an online gaming company trying to predict in-game sales based on player demographic information. Give a short explanation of covariate shift, concept drift and prior shift in this context. 
+
+__Task 3:__ A Poisson GLM is used to model the number of faults (Y_i) in a rolls of cloth, each will different lengths (z_i):
+
+$$ Y_i \sim \text{Pois}(\lambda_i) \quad \text{where} \quad \log(\lambda_i) = \beta_0 + \beta_1 z_i.$$
+Using this Poisson regression as an example, explain the difference between a confidence interval, a credible interval and a prediction interval. 
+
+
+__Task 4:__ The files `point_estimates.csv`, `function_estimates.csv` and `map_estimates.csv` respectively contain bootstrapped estimates of a scalar valued outcome, a 1 dimensional functional outcome and a mapped outcome on a 2-dimensional grid. Explore at least two ways of visualising uncertainty in each of these cases. 
+
+```{r}
+#| include: false
+library(mgcv)
+V_plus <- matrix(c(1,0.4,0.4,1), nrow = 2)
+V_minus <- matrix(c(1,-0.7,-0.7,1), nrow = 2)
+
+set.seed(1234)
+x <- mgcv:::rmvt(n = 1000, mu = c(0,0), V = V_plus,df = 3)
+x[,2] <- abs(x[ ,2])
+plot(x)
+y <- data.frame(sigma = x[ ,2])
+readr::write_csv(y, "point_estimates.csv")
+```
+
+```{r, echo = "false"}
+#| include: false
+#a + b sin(omega * t)
+t <- seq(0, 5 * pi, length.out = 1001)
+V <- diag(c(1,0.1, 2))
+dat <- mgcv::r.mvt(n = 500, mu = c(5, 1, 2), V = V, df = 24)
+
+temp <- matrix(NA, nrow = 1001, ncol = 500)
+for (i in 1:500) {
+  a <- dat[i, 1]
+  b <- dat[i, 2]
+  c <- dat[i, 3]
+  temp[, i] <- a + b + sin(c * t)
+}
+temp <- as.data.frame(temp)
+colnames(temp) <- paste0("bootstrap_", 1:500)
+temp_2 <- data.frame(t = t)
+temp <- cbind(temp_2, temp)
+readr:::write_csv(temp, "function_estimates.csv")
+```
+
+```{r}
+#| include: false
+set.seed(1234)
+x <- seq(12000, 17500, by = 50)
+y <- seq(13500, 22500, by = 50)
+coords <- as.data.frame(expand.grid(x, y))
+colnames(coords) <- c("x", "y")
+
+mu_1 <- c(14500,14000)
+mu_2 <- c(16000, 16000)
+mu_3 <- c(17000, 19000)
+mu_4 <- c(14000, 18000)
+
+V_1 <- matrix(c(50000, 0.5, 0.5, 20000), nrow = 2)
+V_2 <- matrix(c(50000, 0, 0, 20000), nrow = 2)
+V_3 <- matrix(c(50000, 0.9, 0.9, 20000), nrow = 2)
+V_4 <- diag(c(500000,500000))
+
+
+for (i in 1:500) {
+  
+  x_1 <- mgcv::rmvn(n = 100, mu = mu_1, V = V_1)
+  x_2 <- mgcv::rmvn(n = 100, mu = mu_2, V = V_2)
+  x_3 <- mgcv::rmvn(n = 100, mu = mu_3, V = V_3)
+  x_4 <- mgcv::rmvn(n = 100, mu = mu_4, V = V_4)
+  pts <- rbind(x_1, x_2, x_3, x_4)
+  
+  #plot(pts, xlim = c(12000, 18000), ylim = c(13500, 22500))
+  
+  kde <- MASS::kde2d(
+  x = pts[,1], 
+  y = pts[,2],
+  n = c(length(x), length(y)),
+  lims = c(12000, 17500, 13500, 22500))
+  
+  coords[ ,i + 2] <- c(kde$z)
+}
+
+colnames(coords) <- c("x", "y", paste0("bootstrap_", 1:500))
+readr::write_csv(coords, "map_estimates.csv")
+```
