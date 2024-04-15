@@ -109,23 +109,23 @@ _Multi-Armed Bandits:_
 
 Multi-armed bandits can be viewed as an extension of A/B testing to a greater number of options (arms) where the probability of each option being shown to the user adapts as we gather more information. These techniques will be explored in detail during the Reinforcement Learning module next year.
 
-<!-- 
+ 
 ### Ethics 2: Week 5 Reading - Communicating Uncertainty
 
 #### Assessed Reading
 
 You should write your rhetorical precis on the following reading (Due Thursday at 23:59).
 
-> [Van der Bles, A. M., et al. (2019)](https://royalsocietypublishing.org/doi/10.1098/rsos.181870).  Communicating uncertainty about facts, numbers and science. Royal Society open science.
+> [Van der Bles, A. M., et al. (2019)](https://doi.org/10.1098/rsos.181870).  Communicating uncertainty about facts, numbers and science. Royal Society Open Science.
 
 #### Core Reading
 
 - [Schünemann, H. J., et al. (2003)](https://pubmed.ncbi.nlm.nih.gov/14517128/). Letters, numbers, symbols and words: how to communicate  grades of evidence and recommendations. Canadian Medical Association Journal. 
 
-- [Kearns, M., & Roth, A. (2019)](https://library-search.imperial.ac.uk/permalink/44IMP_INST/mek6kh/alma991000531083101591). The ethical algorithm: The science of socially aware algorithm design. Oxford University Press. (Chapter 4)
+- [Kearns, M., & Roth, A. (2019)](https://library-search.imperial.ac.uk/permalink/44IMP_INST/mek6kh/alma991000531083101591). The ethical algorithm: the science of socially aware algorithm design. Oxford University Press. (Chapter 4)
 
 #### Supplementary Reading 
 
-- [Ioannidis, J. P. (2005)](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0020124). Why most published research findings are false. PLoS medicine. 
+- [Ioannidis, J. P. (2005)](https://doi.org/10.1371/journal.pmed.0020124). Why most published research findings are false. PLoS medicine. 
 
--->
+- [Goodman, S. and Greenland S. (2007)](https://doi.org/10.1371/journal.pmed.0040168) Why most published research findings are false: problems in the analysis. PLoS Medicine.
