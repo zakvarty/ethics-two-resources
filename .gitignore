@@ -1,2 +1,5 @@
 #---- Video files
 *.mp4
+
+#---- Large data files
+Activities/5-communicating-uncertainty/map_estimates.csv
