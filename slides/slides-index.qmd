@@ -1,0 +1,35 @@
+---
+title: "Ethics Part II Resources - Slides"
+format:
+  html:
+    theme: [litera]
+    toc: false
+    self-contained: true
+---
+
+## Week 1
+
+1. [interpreting_linear_regression](ethics-2-slides-1a-interpreting_linear_regression.pdf)
+2. [interpreting_logistic_regression](ethics-2-slides-1b-interpreting_logistic_regression.pdf)
+3. [pdps_and_ice_curves](ethics-2-slides-1c-pdps_and_ice_curves.pdf)
+
+## Week 2
+
+1. [accumulated_local_effects](ethics-2-slides-2a-accumulated_local_effects.pdf)
+2. [understanding_interactions](ethics-2-slides-2b-understanding_interactions.pdf)
+
+## Week 3
+
+1. [understanding_bias](ethics-2-slides-3a-understanding_bias.pdf)
+2. [confounders](ethics-2-slides-3b-confounders.pdf)
+3. [colliders](ethics-2-slides-3c-colliders.pdf)
+
+## Week 4
+
+1. [randomised_control_trials](ethics-2-slides-4a-randomised_control_trials.pdf)
+2. [ab_testing](ethics-2-slides-4b-ab_testing.pdf)
+
+## Week 5
+
+1. [degrees_of_evidence](ethics-2-slides-5a-degrees_of_evidence.pdf)
+2. [communicating_uncertainty](ethics-2-slides-5b-communicating_uncertainty.pdf)
